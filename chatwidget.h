@@ -32,6 +32,7 @@ protected:
 
 private:
     Ui::ChatWidget *ui;
+    qint64 latest_msg_ts = 0;
 };
 
 

@@ -46,12 +46,15 @@ public:
         verticalLayout_2->setContentsMargins(0, 0, 0, 0);
         listWidget = new QListWidget(ChatWidget);
         listWidget->setObjectName(QString::fromUtf8("listWidget"));
-        listWidget->setStyleSheet(QString::fromUtf8("QListWidget \n"
+        listWidget->setStyleSheet(QString::fromUtf8("QListWidget::item:selected { background-color: transparent; border: 3px;}\n"
+"\n"
+"QListWidget \n"
 "{\n"
 "  background-color: #f5f5f5;\n"
 "  border-left: 0px;\n"
 "  border-top: 0px;\n"
 "  border-right: 0px;\n"
+"  outline:0px;\n"
 "}\n"
 "QScrollBar:vertical\n"
 "{\n"
@@ -62,23 +65,15 @@ public:
 "    padding-bottom:9px;\n"
 "}\n"
 "\n"
-"QListView:item:selected:active:\n"
-"{\n"
-"	background-color: #f5f5f5;\n"
-"}\n"
 "\n"
-"QListView:item:selected:!active\n"
+"QListView:item:hover\n"
 "{\n"
 "	background-color: #f5f5f5;\n"
-"}\n"
-"\n"
-"QListView:item:selected:hover\n"
-"{\n"
-"	background-color: #f5f5f5;\n"
+"   border: 0px;\n"
 "}"));
         listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         listWidget->setTextElideMode(Qt::ElideMiddle);
-        listWidget->setSpacing(1);
+        listWidget->setSpacing(10);
 
         verticalLayout_2->addWidget(listWidget);
 

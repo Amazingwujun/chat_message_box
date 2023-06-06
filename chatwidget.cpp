@@ -12,12 +12,14 @@ ChatWidget::ChatWidget(QWidget *parent) :
         QWidget(parent), ui(new Ui::ChatWidget) {
     ui->setupUi(this);
 
+    ui->textEdit->setFontFamily("Microsoft Yahei");
+    ui->textEdit->setFontPointSize(10);
+
     connect(this->ui->send_btn, &QPushButton::clicked, [this]() {
         auto msg = this->ui->textEdit->toPlainText();
-        emit onMessageReceived(msg, ChatMessageWrapperWidget::from_myself);
+        emit onMessageReceived(msg, ChatMessageWrapperWidget::_other);
         this->ui->textEdit->clear();
     });
-
 }
 
 ChatWidget::~ChatWidget() {
@@ -58,9 +60,9 @@ void ChatWidget::resizeEvent(QResizeEvent *event) {
 void ChatWidget::onMessageReceived(const QString &msg, ChatMessageWrapperWidget::MessageType type) {
     auto lw = this->ui->listWidget;
     switch (type) {
-        case ChatMessageWrapperWidget::from_myself: {
+        case ChatMessageWrapperWidget::_other: {
             auto randomNum = QRandomGenerator::global()->bounded(100);
-            auto cmww = new ChatMessageWrapperWidget(msg, randomNum > 50 ? ChatMessageWrapperWidget::MessageType::from_other : type,
+            auto cmww = new ChatMessageWrapperWidget(msg, randomNum > 50 ? ChatMessageWrapperWidget::MessageType::_myself : type,
                                                      lw);
             auto lwi = new QListWidgetItem(lw);
             auto size = cmww->calculateSizeByContent(this->width());
@@ -68,11 +70,15 @@ void ChatWidget::onMessageReceived(const QString &msg, ChatMessageWrapperWidget:
             lw->setItemWidget(lwi, cmww);
             break;
         }
-        case ChatMessageWrapperWidget::from_other: {
-
+        case ChatMessageWrapperWidget::_myself: {
+            auto cmww = new ChatMessageWrapperWidget(msg,  type,lw);
+            auto lwi = new QListWidgetItem(lw);
+            auto size = cmww->calculateSizeByContent(this->width());
+            lwi->setSizeHint({this->width(), size.height() + 10});
+            lw->setItemWidget(lwi, cmww);
             break;
         }
-        case ChatMessageWrapperWidget::time_: {
+        case ChatMessageWrapperWidget::_time: {
 
             break;
         }
