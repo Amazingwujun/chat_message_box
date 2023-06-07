@@ -10,7 +10,11 @@
 
 ChatMessageWrapperWidget::ChatMessageWrapperWidget(const QString &msg, ChatMessageWrapperWidget::MessageType type,
                                                    QWidget *parent) :
-        QWidget(parent), messageType(type) {
+        QWidget(parent), messageType(type), msg(msg) {
+    if (type == _time) {
+        return;
+    }
+
     // 头像位置
     avatar = new QLabel("头像", this);
     avatarImg = QPixmap(":/resources/img/jun.jpg");
@@ -29,20 +33,20 @@ ChatMessageWrapperWidget::ChatMessageWrapperWidget(const QString &msg, ChatMessa
     font.setPointSize(10);
     content->setFont(font);
     content->setText(msg);
-    content->setStyleSheet("border-radius: 5px; background-color: white; border: 0px; padding: 5px;");
 
     switch (type) {
-        case _time: {
-            break;
-        }
         case _myself: {
             this->avatar->move(this->width() - this->avatar->width() - 30, 5);
             content->move(avatar->x() - 12 - content->width(), avatar->y());
+
+            this->content->setStyleSheet("background-color: #95ec69;border-radius: 5px;border: 0px; padding: 5px;");
             break;
         }
         case _other: {
             avatar->move(20, 5);
             content->move(avatar->x() + avatar->width() + 12, avatar->y());
+
+            content->setStyleSheet("border-radius: 5px; background-color: white; border: 0px; padding: 5px;");
             break;
         }
     }
@@ -50,17 +54,38 @@ ChatMessageWrapperWidget::ChatMessageWrapperWidget(const QString &msg, ChatMessa
 
 
 void ChatMessageWrapperWidget::resizeEvent(QResizeEvent *event) {
+    qDebug("ChatMessageWrapperWidget::resizeEvent");
     auto size = calculateSizeByContent();
-    content->setFixedSize(size);
+    if (messageType != _time) {
+        content->setFixedSize(size);
+    }
 }
 
 void ChatMessageWrapperWidget::paintEvent(QPaintEvent *event) {
+    qDebug() << "ChatMessageWrapperWidget::paintEvent: " << this->msg;
+
     // 左边三角绘制
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing); // 抗锯齿
 
     switch (this->messageType) {
         case _time: {
+            QFont font{"Microsoft Yahei", 8};
+            QFontMetrics fm(font);
+
+            // 计算时间戳 x, y
+            auto rect = fm.boundingRect({0, 0, 400, 100}, 0, msg);
+            auto x = (this->width() - rect.width()) / 2;
+
+            qDebug() << "x: " << x << " " << msg;
+
+            QRect drawRect{x, 0, rect.width(), rect.height()};
+            painter.setBrush(QBrush(Qt::lightGray));
+            painter.setPen(QPen(Qt::lightGray));
+            painter.drawRoundedRect(drawRect, 5, 5);
+            painter.setPen(QPen(Qt::white));
+            painter.setFont(font);
+            painter.drawText(drawRect, msg, QTextOption{Qt::AlignLeft | Qt::AlignVCenter});
             break;
         }
         case _other: {
@@ -94,11 +119,10 @@ void ChatMessageWrapperWidget::paintEvent(QPaintEvent *event) {
                     QPoint(this->content->x() + this->content->width(), centerY + 7)
             };
 
-            QColor wxGreen{149,236,105}; // 微信绿
+            QColor wxGreen{149, 236, 105}; // 微信绿
             painter.setPen(QPen(wxGreen));
             painter.setBrush(QBrush(wxGreen));
             painter.drawPolygon(points, 3);
-            this->content->setStyleSheet("background-color: #95ec69;border-radius: 5px;border: 0px; padding: 5px;");
             break;
         }
     }
@@ -111,6 +135,15 @@ void ChatMessageWrapperWidget::paintEvent(QPaintEvent *event) {
  * @return
  */
 QSize ChatMessageWrapperWidget::calculateSizeByContent(int suggestedWidth) {
+    if (messageType == _time) {
+        QFont font{"Microsoft Yahei", 8};
+        QFontMetrics fm(font);
+
+        // 计算时间戳 x, y
+        auto rect = fm.boundingRect({0, 0, 400, 100}, 0, msg);
+        return rect.size();
+    }
+
     // 文档、内容、字体度量
     auto text = content->toPlainText();
     auto fm = content->fontMetrics();
@@ -123,7 +156,7 @@ QSize ChatMessageWrapperWidget::calculateSizeByContent(int suggestedWidth) {
 
     // 获取长度
     switch (messageType) {
-        case _other:{
+        case _other: {
             auto lineWidth = (int) (suggestedWidth * 0.8 - (content->x()));
             auto nowrap_rec = fm.boundingRect(QRect(0, 0, lineWidth, 1000), 0, text);
             auto wrap_rec = fm.boundingRect(QRect(0, 0, lineWidth, 1000), Qt::TextWrapAnywhere, text);
@@ -138,7 +171,7 @@ QSize ChatMessageWrapperWidget::calculateSizeByContent(int suggestedWidth) {
             }
         }
         case _myself: {
-            auto lineWidth = (int)(suggestedWidth * 0.8 - this->avatar->width() - 20 - 10);
+            auto lineWidth = (int) (suggestedWidth * 0.8 - this->avatar->width() - 20 - 10);
             auto nowrap_rec = fm.boundingRect(QRect(0, 0, lineWidth, 1000), 0, text);
             auto wrap_rec = fm.boundingRect(QRect(0, 0, lineWidth, 1000), Qt::TextWrapAnywhere, text);
 
@@ -150,9 +183,6 @@ QSize ChatMessageWrapperWidget::calculateSizeByContent(int suggestedWidth) {
                 // 需要换行
                 return {wrap_rec.width() + 20, wrap_rec.height() + 20};
             }
-        }
-        case _time: {
-
         }
     }
 }

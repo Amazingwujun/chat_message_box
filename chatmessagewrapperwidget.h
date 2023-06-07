@@ -42,6 +42,7 @@ private:
     QPixmap avatarImg;
     MessageType messageType;
     QSize avatarSize{48,48};
+    QString msg;
 
     /**
      * 圆角矩形的绘制

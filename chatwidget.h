@@ -8,6 +8,7 @@
 #include <QWidget>
 #include "chatmessagewrapperwidget.h"
 #include <QRandomGenerator>
+#include <QDateTime>
 
 
 QT_BEGIN_NAMESPACE
